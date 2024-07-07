@@ -9,12 +9,17 @@ const userSchema = new mongoose.Schema(
     username: {
       type: String,
       required: true,
-      unique: true, 
+      unique: true,
     },
     password: {
       type: String,
       required: true,
       minlength: 6,
+    },
+    phoneNumber: {
+      type: String,
+      required: true,
+      unique: true,
     },
     gender: {
       type: String,
@@ -25,8 +30,13 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    knownContacts: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "knownContact",
+      },
+    ],
   },
-  //createdAt, updateAt
   { timestamps: true }
 );
 

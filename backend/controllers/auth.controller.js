@@ -4,19 +4,31 @@ import generateTokenAndSetCookie from "../utils/generateToken.js";
 
 export const signup = async (req, res) => {
   try {
-    const { fullName, username, password, confirmPassword, gender } = req.body;
+    const {
+      fullName,
+      username,
+      password,
+      confirmPassword,
+      phoneNumber,
+      gender,
+    } = req.body;
 
     if (password !== confirmPassword) {
       return res.status(400).json({ error: "Passwords don't match" });
     }
 
-    const user = await User.findOne({ username });
+    const userByUsername = await User.findOne({ username });
+    const userByPhoneNumber = await User.findOne({ phoneNumber });
 
-    if (user) {
+    if (userByUsername) {
       return res.status(400).json({ error: "Username already exists" });
     }
 
-    // HASH PASSWORD HERE
+    if (userByPhoneNumber) {
+      return res.status(400).json({ error: "Phone number already exists" });
+    }
+
+    // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
@@ -27,12 +39,13 @@ export const signup = async (req, res) => {
       fullName,
       username,
       password: hashedPassword,
+      phoneNumber,
       gender,
       profilePic: gender === "male" ? boyProfilePic : girlProfilePic,
     });
 
     if (newUser) {
-      // Generate JWT token here
+      // Generate JWT token
       generateTokenAndSetCookie(newUser._id, res);
       await newUser.save();
 
@@ -40,6 +53,7 @@ export const signup = async (req, res) => {
         _id: newUser._id,
         fullName: newUser.fullName,
         username: newUser.username,
+        phoneNumber: newUser.phoneNumber,
         profilePic: newUser.profilePic,
       });
     } else {
@@ -53,15 +67,19 @@ export const signup = async (req, res) => {
 
 export const login = async (req, res) => {
   try {
-    const { username, password } = req.body;
-    const user = await User.findOne({ username });
+    const { username, password, phoneNumber } = req.body;
+    const user = await User.findOne({
+      $or: [{ username: username }],
+    });
     const isPasswordCorrect = await bcrypt.compare(
       password,
       user?.password || ""
     );
 
     if (!user || !isPasswordCorrect) {
-      return res.status(400).json({ error: "Invalid username or password" });
+      return res
+        .status(400)
+        .json({ error: "Invalid username/phone number or password" });
     }
 
     generateTokenAndSetCookie(user._id, res);
@@ -70,6 +88,7 @@ export const login = async (req, res) => {
       _id: user._id,
       fullName: user.fullName,
       username: user.username,
+      phoneNumber: user.phoneNumber,
       profilePic: user.profilePic,
     });
   } catch (error) {
