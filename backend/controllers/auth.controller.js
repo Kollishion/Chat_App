@@ -1,12 +1,15 @@
 import bcrypt from "bcryptjs";
 import User from "../models/user.model.js";
 import generateTokenAndSetCookie from "../utils/generateToken.js";
+import { sendOtpEmail, sendResetPasswordEmail } from "../utils/mailer.js";
+import crypto from "crypto";
 
 export const signup = async (req, res) => {
   try {
     const {
       fullName,
       username,
+      email,
       password,
       confirmPassword,
       phoneNumber,
@@ -18,10 +21,15 @@ export const signup = async (req, res) => {
     }
 
     const userByUsername = await User.findOne({ username });
+    const userByEmail = await User.findOne({ email });
     const userByPhoneNumber = await User.findOne({ phoneNumber });
 
     if (userByUsername) {
       return res.status(400).json({ error: "Username already exists" });
+    }
+
+    if (userByEmail) {
+      return res.status(400).json({ error: "Email already exists" });
     }
 
     if (userByPhoneNumber) {
@@ -38,23 +46,34 @@ export const signup = async (req, res) => {
     const newUser = new User({
       fullName,
       username,
+      email,
       password: hashedPassword,
       phoneNumber,
       gender,
       profilePic: gender === "male" ? boyProfilePic : girlProfilePic,
     });
 
+    // Generate OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    newUser.otp = crypto.createHash("sha256").update(otp).digest("hex");
+    newUser.otpExpiry = Date.now() + 3600000; // 1 hour expiry
+
     if (newUser) {
       // Generate JWT token
       generateTokenAndSetCookie(newUser._id, res);
       await newUser.save();
 
+      // Send OTP email
+      await sendOtpEmail(email, otp);
+
       res.status(201).json({
         _id: newUser._id,
         fullName: newUser.fullName,
         username: newUser.username,
+        email: newUser.email,
         phoneNumber: newUser.phoneNumber,
         profilePic: newUser.profilePic,
+        message: "OTP sent to email",
       });
     } else {
       res.status(400).json({ error: "Invalid user data" });
@@ -67,10 +86,12 @@ export const signup = async (req, res) => {
 
 export const login = async (req, res) => {
   try {
-    const { username, password, phoneNumber } = req.body;
+    const { username, email, password } = req.body;
+
     const user = await User.findOne({
-      $or: [{ username: username }],
+      $or: [{ username: username }, { email: email }],
     });
+
     const isPasswordCorrect = await bcrypt.compare(
       password,
       user?.password || ""
@@ -79,7 +100,7 @@ export const login = async (req, res) => {
     if (!user || !isPasswordCorrect) {
       return res
         .status(400)
-        .json({ error: "Invalid username/phone number or password" });
+        .json({ error: "Invalid username/email or password" });
     }
 
     generateTokenAndSetCookie(user._id, res);
@@ -88,6 +109,7 @@ export const login = async (req, res) => {
       _id: user._id,
       fullName: user.fullName,
       username: user.username,
+      email: user.email,
       phoneNumber: user.phoneNumber,
       profilePic: user.profilePic,
     });
@@ -105,4 +127,60 @@ export const logout = (req, res) => {
     console.log("Error in logout controller", error.message);
     res.status(500).json({ error: "Internal Server Error" });
   }
+};
+
+//Forgot Password
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: "Please provide email!" });
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found with this email!" });
+    }
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, {
+      expiresIn: process.env.RESET_PASSWORD_EXPIRE,
+    });
+
+    await sendResetPasswordEmail(user, token);
+
+    res.status(200).json({
+      success: true,
+      message: "Password reset email sent",
+    });
+  } catch (error) {
+    console.error("Error in forgotPassword controller:", error.message);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+//Reset Password
+export const resetPassword = async (req, res) => {
+  const { id, token } = req.params;
+  const { password } = req.body;
+
+  jwt.verify(token, process.env.JWT_SECRET_KEY, async (err, decoded) => {
+    if (err) {
+      return next(new ErrorHandler("Token is invalid or has expired", 400));
+    }
+
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json("User not found!");
+    }
+
+    user.password = await bcrypt.hash(password, 10);
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Password reset successfully",
+    });
+  });
 };
