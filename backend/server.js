@@ -6,6 +6,7 @@ import userRoutes from "./routes/user.routes.js";
 import otpRoutes from "./routes/otp.routes.js";
 import connectToMongoDB from "./db/connectToMongoDB.js";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 
 const app = express();
 const PORT = process.env.PORT || 5000;

@@ -3,6 +3,7 @@ import SignUp from "./pages/signup/SignUp";
 import Home from "./pages/home/Home";
 import { Routes, Route } from "react-router-dom";
 import ForgotPassword from "./pages/forgotpassword/ForgotPassword";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
           <Route path="/signup" element={<SignUp />} />
           <Route path="/forgotpassword" element={<ForgotPassword />} />
         </Routes>
+        <Toaster />
       </div>
     </>
   );
