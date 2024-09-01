@@ -1,16 +1,16 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import GenderCheckbox from "./GenderCheckbox";
 import { useState } from "react";
-import useSignup from "../../hooks/useSignup"; // Correctly import the custom hook
+import useSignup from "../../hooks/useSignup";
 
 const SignUp = () => {
-  const navigate = useNavigate();
-
   const [inputs, setInputs] = useState({
     fullName: "",
     username: "",
+    email: "",
     password: "",
     confirmPassword: "",
+    phoneNumber: "",
     gender: "",
   });
 
@@ -20,7 +20,7 @@ const SignUp = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     await signup(inputs);
-    navigate("/login");
+    console.log(inputs);
   };
 
   //Function to handle Gender Checkbox
@@ -35,15 +35,18 @@ const SignUp = () => {
           Sign Up <span className="text-blue-300">ChatApp</span>
         </h1>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} method="POST">
           <div>
-            <label className="label p-2">
+            <label htmlFor="fullName" className="label p-2">
               <span className="text-base label-text">Full Name</span>
             </label>
             <input
               type="text"
               placeholder="John Doe"
               className="w-full input input-bordered h-10"
+              name="fullName"
+              id="fullName"
+              required
               value={inputs.fullName}
               onChange={(e) =>
                 setInputs({ ...inputs, fullName: e.target.value })
@@ -52,28 +55,48 @@ const SignUp = () => {
           </div>
 
           <div>
-            <label className="label p-2 ">
+            <label className="label p-2" htmlFor="Username">
               <span className="text-base label-text">Username</span>
             </label>
             <input
               type="text"
               placeholder="johndoe"
               className="w-full input input-bordered h-10"
+              id="Username"
+              name="Username"
+              required
               value={inputs.username}
               onChange={(e) =>
                 setInputs({ ...inputs, username: e.target.value })
               }
             />
           </div>
+          <div>
+            <label className="label p-2" htmlFor="email">
+              <span className="text-base label-text">Email</span>
+            </label>
+            <input
+              type="email"
+              placeholder="johndoe@gmail.com"
+              className="w-full input input-bordered h-10"
+              name="email"
+              id="email"
+              value={inputs.email}
+              onChange={(e) => setInputs({ ...inputs, email: e.target.value })}
+              required
+            />
+          </div>
 
           <div>
-            <label className="label">
+            <label className="label" htmlFor="password">
               <span className="text-base label-text">Password</span>
             </label>
             <input
               type="password"
               placeholder="Enter Password"
               className="w-full input input-bordered h-10"
+              name="password"
+              id="password"
               value={inputs.password}
               onChange={(e) =>
                 setInputs({ ...inputs, password: e.target.value })
@@ -82,16 +105,35 @@ const SignUp = () => {
           </div>
 
           <div>
-            <label className="label">
+            <label className="label" htmlFor="confirmPassword">
               <span className="text-base label-text">Confirm Password</span>
             </label>
             <input
               type="password"
               placeholder="Confirm Password"
               className="w-full input input-bordered h-10"
+              name="confirmPassword"
+              id="confirmPassword"
               value={inputs.confirmPassword}
               onChange={(e) =>
                 setInputs({ ...inputs, confirmPassword: e.target.value })
+              }
+            />
+          </div>
+
+          <div>
+            <label className="label p-2" htmlFor="phoneNumber">
+              <span className="text-base label-text">Phone Number</span>
+            </label>
+            <input
+              type="text"
+              placeholder="Your Phone Number"
+              className="w-full input input-bordered h-10"
+              name="phoneNumber"
+              id="phoneNumber"
+              value={inputs.phoneNumber}
+              onChange={(e) =>
+                setInputs({ ...inputs, phoneNumber: e.target.value })
               }
             />
           </div>

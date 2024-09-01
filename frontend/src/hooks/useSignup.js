@@ -2,8 +2,10 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { signupUser } from "../redux/authSlice";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 const useSignup = () => {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
 
@@ -13,6 +15,8 @@ const useSignup = () => {
     password,
     confirmPassword,
     gender,
+    email,
+    phoneNumber,
   }) => {
     const isValid = handleInputErrors({
       fullName,
@@ -20,6 +24,8 @@ const useSignup = () => {
       password,
       confirmPassword,
       gender,
+      email,
+      phoneNumber,
     });
 
     if (!isValid) return;
@@ -33,9 +39,12 @@ const useSignup = () => {
           password,
           confirmPassword,
           gender,
+          email,
+          phoneNumber,
         })
       );
       toast.success("Signup successful!");
+      setLoading(false);
     } catch (error) {
       const errorMessage = error?.message || "An unexpected error occurred.";
       toast.error(errorMessage);
@@ -55,8 +64,18 @@ const handleInputErrors = ({
   password,
   confirmPassword,
   gender,
+  email,
+  phoneNumber,
 }) => {
-  if (!fullName || !username || !password || !confirmPassword || !gender) {
+  if (
+    !fullName ||
+    !username ||
+    !password ||
+    !confirmPassword ||
+    !gender ||
+    !email ||
+    !phoneNumber
+  ) {
     toast.error("Please fill in all the fields.");
     return false;
   }

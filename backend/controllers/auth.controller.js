@@ -5,6 +5,7 @@ import { sendOtpEmail, sendResetPasswordEmail } from "../utils/mailer.js";
 import crypto from "crypto";
 
 export const signup = async (req, res) => {
+  console.log(req.body);
   try {
     const {
       fullName,
