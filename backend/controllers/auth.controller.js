@@ -4,6 +4,7 @@ import generateTokenAndSetCookie from "../utils/generateToken.js";
 import { sendOtpEmail, sendResetPasswordEmail } from "../utils/mailer.js";
 import crypto from "crypto";
 
+//Sign Up
 export const signup = async (req, res) => {
   console.log(req.body);
   try {
@@ -85,13 +86,12 @@ export const signup = async (req, res) => {
   }
 };
 
+//Login
 export const login = async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const { username, password } = req.body;
 
-    const user = await User.findOne({
-      $or: [{ username: username }, { email: email }],
-    });
+    const user = await User.findOne({ username });
 
     const isPasswordCorrect = await bcrypt.compare(
       password,
@@ -99,9 +99,7 @@ export const login = async (req, res) => {
     );
 
     if (!user || !isPasswordCorrect) {
-      return res
-        .status(400)
-        .json({ error: "Invalid username/email or password" });
+      return res.status(400).json({ error: "Invalid username or password" });
     }
 
     generateTokenAndSetCookie(user._id, res);
@@ -120,6 +118,7 @@ export const login = async (req, res) => {
   }
 };
 
+//Logout
 export const logout = (req, res) => {
   try {
     res.cookie("jwt", "", { maxAge: 0 });

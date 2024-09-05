@@ -20,7 +20,6 @@ const SignUp = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     await signup(inputs);
-    console.log(inputs);
   };
 
   //Function to handle Gender Checkbox

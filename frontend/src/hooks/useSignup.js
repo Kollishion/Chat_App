@@ -45,6 +45,7 @@ const useSignup = () => {
       );
       toast.success("Signup successful!");
       setLoading(false);
+      navigate("/login");
     } catch (error) {
       const errorMessage = error?.message || "An unexpected error occurred.";
       toast.error(errorMessage);
