@@ -18,7 +18,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await dispatch(loginUser(inputs));
+      dispatch(loginUser(inputs));
       if (isAuthenticated) {
         toast.success("Login successful!");
         navigate("/");

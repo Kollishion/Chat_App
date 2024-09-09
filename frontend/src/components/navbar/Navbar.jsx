@@ -1,7 +1,10 @@
 import { Link } from "react-router-dom";
 import { CgMenuRound } from "react-icons/cg";
+import { useSelector } from "react-redux";
+import Logout from "../logout/Logout";
 
 const Navbar = () => {
+  const { isAuthenticated } = useSelector((state) => state.auth);
   return (
     <div className="fixed w-[100%]">
       <div className="navbar bg-base-100">
@@ -21,12 +24,20 @@ const Navbar = () => {
                   <CgMenuRound />
                 </summary>
                 <ul className="bg-base-100 rounded-t-none p-2">
-                  <li>
-                    <Link to="/signup">Signup</Link>
-                  </li>
-                  <li>
-                    <Link to="/login">Login</Link>
-                  </li>
+                  {isAuthenticated ? (
+                    <li>
+                      <Logout />
+                    </li>
+                  ) : (
+                    <>
+                      <li>
+                        <Link to="/signup">Signup</Link>
+                      </li>
+                      <li>
+                        <Link to="/login">Login</Link>
+                      </li>
+                    </>
+                  )}
                 </ul>
               </details>
             </li>

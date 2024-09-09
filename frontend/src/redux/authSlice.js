@@ -19,6 +19,36 @@ export const signupUser = createAsyncThunk(
   }
 );
 
+export const forgetPasswordUser = createAsyncThunk(
+  "auth/forgetPasswordUser",
+  async (userData, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(
+        `${baseURL}/api/auth/forgetpassword`,
+        userData
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const resetPasswordUser = createAsyncThunk(
+  "auth/resetPasswordUser",
+  async ({ id, token, password }, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(
+        `${baseURL}/api/auth/resetPassword/${id}/${token}`,
+        { password }
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
 const initialState = {
   user: null,
   token: null,
