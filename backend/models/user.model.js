@@ -21,11 +21,6 @@ const userSchema = new mongoose.Schema(
       required: true,
       minlength: 6,
     },
-    phoneNumber: {
-      type: String,
-      required: true,
-      unique: true,
-    },
     gender: {
       type: String,
       required: true,
@@ -35,10 +30,11 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    knownContacts: [
+    blockedContacts: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "knownContact",
+        type: String,
+        default: [],
+        id: "",
       },
     ],
   },

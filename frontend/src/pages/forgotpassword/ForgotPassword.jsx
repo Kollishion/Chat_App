@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { forgetPasswordUser } from "../features/auth/authSlice";
+import { forgetPasswordUser } from "../../redux/authSlice.js";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");

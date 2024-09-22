@@ -1,9 +1,9 @@
-import { BiLogOut } from "react-icons/bi";
+import Logout from "../logout/Logout";
 
 const LogoutButton = () => {
   return (
     <div className="absolute sm:bottom-10 left-4 lg:bottom-10">
-      <BiLogOut className="w-6 h-6 text-white cursor-pointer flex flex-col" />
+      <Logout />
     </div>
   );
 };

@@ -6,7 +6,13 @@ const baseURL = "http://localhost:5000";
 export const loginUser = createAsyncThunk(
   "auth/loginUser",
   async (credentials) => {
-    const response = await axios.post(`${baseURL}/api/auth/login`, credentials);
+    const response = await axios.post(
+      `${baseURL}/api/auth/login`,
+      credentials,
+      {
+        withCredentials: true,
+      }
+    );
     return response.data;
   }
 );

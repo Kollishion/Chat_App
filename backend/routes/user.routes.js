@@ -1,15 +1,9 @@
 import express from "express";
 import protectRoute from "../middleware/protectRoute.js";
-import {
-  getUsersForSidebar,
-  addContact,
-  uploadContacts,
-} from "../controllers/user.controller.js";
+import { getUsersForSidebar } from "../controllers/user.controller.js";
 
 const router = express.Router();
 
-router.get("/", protectRoute, getUsersForSidebar);
-router.post("/addContact", protectRoute, addContact);
-router.post("/uploadContacts", protectRoute, uploadContacts);
+router.get("/chatContacts", protectRoute, getUsersForSidebar);
 
 export default router;

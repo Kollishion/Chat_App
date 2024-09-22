@@ -17,7 +17,13 @@ dotenv.config();
 const PORT = process.env.PORT || 5000;
 
 // Middleware Setup
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:3000", // Frontend URL
+    credentials: true, // Allow cookies to be sent
+  })
+);
+
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));

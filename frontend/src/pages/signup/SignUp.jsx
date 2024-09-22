@@ -10,7 +10,6 @@ const SignUp = () => {
     email: "",
     password: "",
     confirmPassword: "",
-    phoneNumber: "",
     gender: "",
   });
 
@@ -120,23 +119,6 @@ const SignUp = () => {
             />
           </div>
 
-          <div>
-            <label className="label p-2" htmlFor="phoneNumber">
-              <span className="text-base label-text">Phone Number</span>
-            </label>
-            <input
-              type="text"
-              placeholder="Your Phone Number"
-              className="w-full input input-bordered h-10"
-              name="phoneNumber"
-              id="phoneNumber"
-              value={inputs.phoneNumber}
-              onChange={(e) =>
-                setInputs({ ...inputs, phoneNumber: e.target.value })
-              }
-            />
-          </div>
-
           <GenderCheckbox
             onCheckboxChange={handleCheckboxChange}
             selectedGender={inputs.gender}
@@ -155,7 +137,11 @@ const SignUp = () => {
               type="submit"
               disabled={loading}
             >
-              {loading ? "Signing Up..." : "Sign Up"}
+              {loading ? (
+                <span className="loading loading-spinner"></span>
+              ) : (
+                "Sign Up"
+              )}
             </button>
           </div>
         </form>

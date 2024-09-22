@@ -16,7 +16,6 @@ const useSignup = () => {
     confirmPassword,
     gender,
     email,
-    phoneNumber,
   }) => {
     const isValid = handleInputErrors({
       fullName,
@@ -25,7 +24,6 @@ const useSignup = () => {
       confirmPassword,
       gender,
       email,
-      phoneNumber,
     });
 
     if (!isValid) return;
@@ -40,7 +38,6 @@ const useSignup = () => {
           confirmPassword,
           gender,
           email,
-          phoneNumber,
         })
       );
       toast.success("Signup successful!");
@@ -66,7 +63,6 @@ const handleInputErrors = ({
   confirmPassword,
   gender,
   email,
-  phoneNumber,
 }) => {
   if (
     !fullName ||
@@ -74,8 +70,7 @@ const handleInputErrors = ({
     !password ||
     !confirmPassword ||
     !gender ||
-    !email ||
-    !phoneNumber
+    !email
   ) {
     toast.error("Please fill in all the fields.");
     return false;

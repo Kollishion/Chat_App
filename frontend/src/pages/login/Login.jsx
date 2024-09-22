@@ -47,6 +47,7 @@ const Login = () => {
               className="w-full input input-bordered h-10"
               name="username"
               id="username"
+              autoComplete="current-password"
               value={inputs.username}
               onChange={(e) =>
                 setInputs({ ...inputs, username: e.target.value })
@@ -92,7 +93,11 @@ const Login = () => {
               className="btn btn-block btn-sm mt-2"
               disabled={status === "loading"}
             >
-              {status === "loading" ? "Logging In..." : "Login"}
+              {status === "loading" ? (
+                <span className="loading loading-spinner"></span>
+              ) : (
+                "Login"
+              )}
             </button>
             {status === "failed" && <p className="text-red-500">{error}</p>}
           </div>
