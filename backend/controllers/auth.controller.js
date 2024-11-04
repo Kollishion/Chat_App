@@ -3,20 +3,12 @@ import User from "../models/user.model.js";
 import generateTokenAndSetCookie from "../utils/generateToken.js";
 import { sendOtpEmail, sendResetPasswordEmail } from "../utils/mailer.js";
 import crypto from "crypto";
+import jwt from "jsonwebtoken";
 
 //Sign Up
 export const signup = async (req, res) => {
-  console.log(req.body);
   try {
-    const {
-      fullName,
-      username,
-      email,
-      password,
-      confirmPassword,
-      phoneNumber,
-      gender,
-    } = req.body;
+    const { fullName, username, email, password, confirmPassword, gender } = req.body;
 
     if (password !== confirmPassword) {
       return res.status(400).json({ error: "Passwords don't match" });
@@ -24,7 +16,6 @@ export const signup = async (req, res) => {
 
     const userByUsername = await User.findOne({ username });
     const userByEmail = await User.findOne({ email });
-    const userByPhoneNumber = await User.findOne({ phoneNumber });
 
     if (userByUsername) {
       return res.status(400).json({ error: "Username already exists" });
@@ -32,10 +23,6 @@ export const signup = async (req, res) => {
 
     if (userByEmail) {
       return res.status(400).json({ error: "Email already exists" });
-    }
-
-    if (userByPhoneNumber) {
-      return res.status(400).json({ error: "Phone number already exists" });
     }
 
     // Hash password
@@ -50,7 +37,6 @@ export const signup = async (req, res) => {
       username,
       email,
       password: hashedPassword,
-      phoneNumber,
       gender,
       profilePic: gender === "male" ? boyProfilePic : girlProfilePic,
     });
@@ -64,7 +50,6 @@ export const signup = async (req, res) => {
       // Generate JWT token
       generateTokenAndSetCookie(newUser._id, res);
       await newUser.save();
-
       // Send OTP email
       await sendOtpEmail(email, otp);
 
@@ -73,7 +58,6 @@ export const signup = async (req, res) => {
         fullName: newUser.fullName,
         username: newUser.username,
         email: newUser.email,
-        phoneNumber: newUser.phoneNumber,
         profilePic: newUser.profilePic,
         message: "OTP sent to email",
       });
@@ -81,7 +65,7 @@ export const signup = async (req, res) => {
       res.status(400).json({ error: "Invalid user data" });
     }
   } catch (error) {
-    console.log("Error in signup controller", error.message);
+    console.error("Error in signup controller", error.message);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
@@ -109,11 +93,10 @@ export const login = async (req, res) => {
       fullName: user.fullName,
       username: user.username,
       email: user.email,
-      phoneNumber: user.phoneNumber,
       profilePic: user.profilePic,
     });
   } catch (error) {
-    console.log("Error in login controller", error.message);
+    console.error("Error in login controller", error.message);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
@@ -124,7 +107,7 @@ export const logout = (req, res) => {
     res.cookie("jwt", "", { maxAge: 0 });
     res.status(200).json({ message: "Logged out successfully" });
   } catch (error) {
-    console.log("Error in logout controller", error.message);
+    console.error("Error in logout controller", error.message);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
@@ -167,12 +150,12 @@ export const resetPassword = async (req, res) => {
 
   jwt.verify(token, process.env.JWT_SECRET_KEY, async (err, decoded) => {
     if (err) {
-      return next(new ErrorHandler("Token is invalid or has expired", 400));
+      return res.status(400).json({ error: "Token is invalid or has expired" });
     }
 
     const user = await User.findById(id);
     if (!user) {
-      return res.status(404).json("User not found!");
+      return res.status(404).json({ error: "User not found!" });
     }
 
     user.password = await bcrypt.hash(password, 10);

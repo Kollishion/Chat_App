@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { loginUser } from "../../redux/authSlice";
 import { Link } from "react-router-dom";
@@ -17,17 +17,17 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      dispatch(loginUser(inputs));
-      if (isAuthenticated) {
-        toast.success("Login successful!");
-        navigate("/");
-      }
-    } catch (err) {
-      console.error("Failed to log in:", err.message);
+    dispatch(loginUser(inputs)); // Dispatching the login action
+  };
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      toast.success("Login successful!");
+      navigate("/");
+    } else if (status === "failed") {
       toast.error("Failed to log in. Please check your credentials.");
     }
-  };
+  }, [isAuthenticated, status, navigate]);
 
   return (
     <div className="flex flex-col items-center justify-center min-w-96 mx-auto">
@@ -47,7 +47,8 @@ const Login = () => {
               className="w-full input input-bordered h-10"
               name="username"
               id="username"
-              autoComplete="current-password"
+              autoComplete="username"
+              required
               value={inputs.username}
               onChange={(e) =>
                 setInputs({ ...inputs, username: e.target.value })
@@ -65,6 +66,8 @@ const Login = () => {
               className="w-full input input-bordered h-10"
               name="password"
               id="password"
+              autoComplete="current-password"
+              required
               value={inputs.password}
               onChange={(e) =>
                 setInputs({ ...inputs, password: e.target.value })
@@ -99,7 +102,11 @@ const Login = () => {
                 "Login"
               )}
             </button>
-            {status === "failed" && <p className="text-red-500">{error}</p>}
+            {status === "failed" && (
+              <p className="text-red-500">
+                {typeof error === "string" ? error : JSON.stringify(error)}
+              </p>
+            )}
           </div>
         </form>
       </div>

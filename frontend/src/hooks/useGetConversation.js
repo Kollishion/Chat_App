@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchConversation } from "../redux/conversationSlice";
-import toast from "react-hot-toast";
 
 const useGetConversations = () => {
   const dispatch = useDispatch();
@@ -21,7 +20,7 @@ const useGetConversations = () => {
 
   useEffect(() => {
     if (status === "failed" && error) {
-      toast.error(error);
+      console.error(error);
     }
   }, [status, error]);
 

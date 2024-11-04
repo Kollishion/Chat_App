@@ -12,7 +12,8 @@ export const fetchConversation = createAsyncThunk(
       });
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      const message = error.response?.data || "Network Error";
+      return rejectWithValue(message);
     }
   }
 );
@@ -22,7 +23,7 @@ const conversationSlice = createSlice({
   initialState: {
     conversations: [],
     selectedConversation: null,
-    status: "idle", // idle | loading | succeeded | failed
+    status: "idle",
     error: null,
   },
   reducers: {
@@ -37,6 +38,7 @@ const conversationSlice = createSlice({
     builder
       .addCase(fetchConversation.pending, (state) => {
         state.status = "loading";
+        state.error = null;
       })
       .addCase(fetchConversation.fulfilled, (state, action) => {
         state.status = "succeeded";
@@ -44,11 +46,11 @@ const conversationSlice = createSlice({
       })
       .addCase(fetchConversation.rejected, (state, action) => {
         state.status = "failed";
-        state.error = action.payload;
+        state.error = action.payload || "Failed to fetch conversations";
       });
   },
 });
 
-export const { setSelectedConversation } = conversationSlice.actions;
-export const { setConversations } = conversationSlice.actions;
+export const { setSelectedConversation, setConversations } =
+  conversationSlice.actions;
 export default conversationSlice.reducer;

@@ -7,8 +7,6 @@ export const getUsersForSidebar = async (req, res) => {
       _id: { $ne: loggedInUserId },
     }).select("-password");
 
-    console.log("Users fetched for chat contacts:", filteredUsers); // Log users
-
     res.status(200).json(filteredUsers);
   } catch (error) {
     console.error("Error fetching users for sidebar:", error);

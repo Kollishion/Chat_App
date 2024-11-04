@@ -44,7 +44,8 @@ const useSignup = () => {
       setLoading(false);
       navigate("/login");
     } catch (error) {
-      const errorMessage = error?.message || "An unexpected error occurred.";
+      const errorMessage =
+        error.response?.data?.message || "An unexpected error occurred.";
       toast.error(errorMessage);
     } finally {
       setLoading(false);

@@ -30,7 +30,7 @@ const Conversations = () => {
   }, [conversations, emojis]);
 
   return (
-    <div className="w-[44vh] h-[50vh] absolute lg:top-[17vh] sm:top-[15vh] left-[-18px] px-3 flex flex-col overflow-auto">
+    <div className="py-2 flex flex-col overflow-auto absolute bottom-28">
       {conversations.map((conversation, idx) => (
         <Conversation
           key={conversation._id}
