@@ -8,23 +8,13 @@ const useLogin = () => {
   const dispatch = useDispatch();
 
   const login = async ({ username, password }) => {
-    const isValid = handleInputErrors({
-      username,
-      password,
-    });
+    const isValid = handleInputErrors({ username, password });
 
     if (!isValid) return;
 
     setLoading(true);
     try {
-      dispatch(
-        loginUser({
-          username,
-          password,
-        })
-      );
-      toast.success("Login successful!");
-      setLoading(false);
+      await dispatch(loginUser({ username, password }));
     } catch (error) {
       const errorMessage = error?.message || "An unexpected error occurred.";
       toast.error(errorMessage);
@@ -35,8 +25,6 @@ const useLogin = () => {
 
   return { login, loading };
 };
-
-export default useLogin;
 
 const handleInputErrors = ({ username, password }) => {
   if (!username || !password) {
@@ -51,3 +39,5 @@ const handleInputErrors = ({ username, password }) => {
 
   return true;
 };
+
+export default useLogin;

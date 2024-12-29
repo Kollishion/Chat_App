@@ -1,23 +1,18 @@
 import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { loginUser } from "../../redux/authSlice";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+import useLogin from "../../hooks/useLogin";
+import { useSelector } from "react-redux";
 
 const Login = () => {
-  const [inputs, setInputs] = useState({
-    username: "",
-    password: "",
-  });
-
-  const dispatch = useDispatch();
-  const { isAuthenticated, status, error } = useSelector((state) => state.auth);
+  const [inputs, setInputs] = useState({ username: "", password: "" });
+  const { login, loading } = useLogin();
+  const { isAuthenticated, status } = useSelector((state) => state.auth);
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    dispatch(loginUser(inputs)); // Dispatching the login action
+    login(inputs);
   };
 
   useEffect(() => {
@@ -94,9 +89,9 @@ const Login = () => {
             <button
               type="submit"
               className="btn btn-block btn-sm mt-2"
-              disabled={status === "loading"}
+              disabled={loading} // Disable button if loading
             >
-              {status === "loading" ? (
+              {loading ? (
                 <span className="loading loading-spinner"></span>
               ) : (
                 "Login"
@@ -104,7 +99,7 @@ const Login = () => {
             </button>
             {status === "failed" && (
               <p className="text-red-500">
-                {typeof error === "string" ? error : JSON.stringify(error)}
+                {/* Optionally display error messages here */}
               </p>
             )}
           </div>

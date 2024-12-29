@@ -1,7 +1,8 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 import { toast } from "react-hot-toast";
-
+import { initializeSocket, getSocket } from "./socketSlice";
+import { io } from "socket.io-client";
 const baseURL = "http://localhost:5000";
 
 // Login user action
@@ -14,6 +15,8 @@ export const loginUser = createAsyncThunk(
         credentials,
         { withCredentials: true }
       );
+      // Store the authentication status and user info in sessionStorage
+      sessionStorage.setItem("user", JSON.stringify(response.data));
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || "Login failed");
@@ -66,12 +69,12 @@ export const resetPasswordUser = createAsyncThunk(
   }
 );
 
-// Initial State
 const initialState = {
-  user: null,
-  isAuthenticated: false,
+  user: JSON.parse(sessionStorage.getItem("user")) || null,
+  isAuthenticated: !!sessionStorage.getItem("user"),
   status: "idle",
   error: null,
+  socket: null,
 };
 
 const authSlice = createSlice({
@@ -79,8 +82,14 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     logout: (state) => {
+      const socket = getSocket();
+      if (socket) {
+        socket.disconnect();
+        console.log("Socket Disconnected");
+      }
       state.user = null;
       state.isAuthenticated = false;
+      sessionStorage.removeItem("user");
       toast.success("You have successfully logged out.");
     },
   },
@@ -88,13 +97,36 @@ const authSlice = createSlice({
     builder
       .addCase(loginUser.pending, (state) => {
         state.status = "loading";
-        state.error = null; // Clear previous errors
+        state.error = null;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.user = action.payload;
         state.isAuthenticated = true;
         state.status = "succeeded";
         toast.success("Welcome back!");
+        console.log("Login API Response Payload:", action.payload);
+        const userId = action.payload?._id || action.payload?.userId;
+        if (!userId) {
+          console.error("Failed to initialize socket: User ID is missing");
+          return;
+        }
+        console.log("User ID for socket initialization:", userId);
+        let socket = initializeSocket(userId);
+        if (!socket || !socket.connected) {
+          socket = io(baseURL, { query: { userId } });
+          console.log("Socket initialized with ID:", userId);
+        }
+        if (socket) {
+          socket.on("connect", () => {
+            console.log("Socket Connected:", socket.id);
+          });
+          socket.on("getOnlineUsers", (users) => {
+            console.log("Online users:", users);
+          });
+          socket.on("disconnect", () => {
+            console.log("Socket Disconnected.");
+          });
+        }
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.status = "failed";
@@ -107,7 +139,6 @@ const authSlice = createSlice({
       })
       .addCase(signupUser.pending, (state) => {
         state.status = "loading";
-        state.error = null; // Clear previous errors
       })
       .addCase(signupUser.fulfilled, (state, action) => {
         state.user = action.payload;
@@ -126,8 +157,8 @@ const authSlice = createSlice({
   },
 });
 
-// Export logout action
+// Exporting logout action
 export const { logout } = authSlice.actions;
 
-// Export the reducer
+// Exporting the reducer
 export default authSlice.reducer;

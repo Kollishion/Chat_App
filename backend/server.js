@@ -7,9 +7,7 @@ import userRoutes from "./routes/user.routes.js";
 import otpRoutes from "./routes/otp.routes.js";
 import connectToMongoDB from "./db/connectToMongoDB.js";
 import cookieParser from "cookie-parser";
-
-// Initialize express app
-const app = express();
+import { app, server } from "./socket/socket.js";
 
 // Load environment variables
 dotenv.config();
@@ -37,7 +35,7 @@ app.use("/api/otp", otpRoutes);
 // Connect to the database and start the server
 connectToMongoDB()
   .then(() => {
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
     });
   })
