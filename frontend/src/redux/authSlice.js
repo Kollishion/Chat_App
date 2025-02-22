@@ -1,11 +1,10 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 import { toast } from "react-hot-toast";
-import { initializeSocket, getSocket } from "./socketSlice";
-import { io } from "socket.io-client";
+
 const baseURL = "http://localhost:5000";
 
-// Login user action
+// 🔹 Login user action
 export const loginUser = createAsyncThunk(
   "auth/loginUser",
   async (credentials, { rejectWithValue }) => {
@@ -15,16 +14,17 @@ export const loginUser = createAsyncThunk(
         credentials,
         { withCredentials: true }
       );
-      // Store the authentication status and user info in sessionStorage
+
+      // ✅ Store user in sessionStorage
       sessionStorage.setItem("user", JSON.stringify(response.data));
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data || "Login failed");
+      return rejectWithValue(error.response?.data || "Login failed!");
     }
   }
 );
 
-// Signup user action
+// 🔹 Signup user action
 export const signupUser = createAsyncThunk(
   "auth/signupUser",
   async (userData, { rejectWithValue }) => {
@@ -32,12 +32,12 @@ export const signupUser = createAsyncThunk(
       const response = await axios.post(`${baseURL}/api/auth/signup`, userData);
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data || "Signup failed");
+      return rejectWithValue(error.response?.data || "Signup failed!");
     }
   }
 );
 
-// Forgot password action
+// 🔹 Forgot password action
 export const forgetPasswordUser = createAsyncThunk(
   "auth/forgetPasswordUser",
   async (userData, { rejectWithValue }) => {
@@ -48,12 +48,12 @@ export const forgetPasswordUser = createAsyncThunk(
       );
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data || "Password reset failed");
+      return rejectWithValue(error.response?.data || "Password reset failed!");
     }
   }
 );
 
-// Reset password action
+// 🔹 Reset password action
 export const resetPasswordUser = createAsyncThunk(
   "auth/resetPasswordUser",
   async ({ id, token, password }, { rejectWithValue }) => {
@@ -64,37 +64,36 @@ export const resetPasswordUser = createAsyncThunk(
       );
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data || "Password reset failed");
+      return rejectWithValue(error.response?.data || "Password reset failed!");
     }
   }
 );
 
+// 🔹 Initial State (Using sessionStorage)
 const initialState = {
   user: JSON.parse(sessionStorage.getItem("user")) || null,
   isAuthenticated: !!sessionStorage.getItem("user"),
   status: "idle",
   error: null,
-  socket: null,
 };
 
+// 🔹 Auth Slice
 const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
     logout: (state) => {
-      const socket = getSocket();
-      if (socket) {
-        socket.disconnect();
-        console.log("Socket Disconnected");
-      }
       state.user = null;
       state.isAuthenticated = false;
-      sessionStorage.removeItem("user");
+      state.status = "idle";
+      state.error = null;
+      sessionStorage.removeItem("user"); // ✅ Clears sessionStorage
       toast.success("You have successfully logged out.");
     },
   },
   extraReducers: (builder) => {
     builder
+      // 🔹 Login Cases
       .addCase(loginUser.pending, (state) => {
         state.status = "loading";
         state.error = null;
@@ -103,62 +102,31 @@ const authSlice = createSlice({
         state.user = action.payload;
         state.isAuthenticated = true;
         state.status = "succeeded";
-        toast.success("Welcome back!");
-        console.log("Login API Response Payload:", action.payload);
-        const userId = action.payload?._id || action.payload?.userId;
-        if (!userId) {
-          console.error("Failed to initialize socket: User ID is missing");
-          return;
-        }
-        console.log("User ID for socket initialization:", userId);
-        let socket = initializeSocket(userId);
-        if (!socket || !socket.connected) {
-          socket = io(baseURL, { query: { userId } });
-          console.log("Socket initialized with ID:", userId);
-        }
-        if (socket) {
-          socket.on("connect", () => {
-            console.log("Socket Connected:", socket.id);
-          });
-          socket.on("getOnlineUsers", (users) => {
-            console.log("Online users:", users);
-          });
-          socket.on("disconnect", () => {
-            console.log("Socket Disconnected.");
-          });
-        }
+        toast.success(`Welcome back, ${action.payload.username}!`);
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.status = "failed";
-        state.error = action.payload || action.error.message;
-        toast.error(
-          typeof action.payload === "string"
-            ? action.payload
-            : "Login failed. Please try again."
-        );
+        state.error = action.payload || "Login failed!";
+        toast.error(state.error);
       })
+
+      // 🔹 Signup Cases
       .addCase(signupUser.pending, (state) => {
         state.status = "loading";
       })
       .addCase(signupUser.fulfilled, (state, action) => {
         state.user = action.payload;
         state.status = "succeeded";
-        toast.success("Now Log in with your credentials");
+        toast.success("Signup successful! Please log in.");
       })
       .addCase(signupUser.rejected, (state, action) => {
         state.status = "failed";
-        state.error = action.payload || action.error.message;
-        toast.error(
-          typeof action.payload === "string"
-            ? action.payload
-            : "Signup failed. Please try again."
-        );
+        state.error = action.payload || "Signup failed!";
+        toast.error(state.error);
       });
   },
 });
 
-// Exporting logout action
+// 🔹 Exporting actions & reducer
 export const { logout } = authSlice.actions;
-
-// Exporting the reducer
 export default authSlice.reducer;

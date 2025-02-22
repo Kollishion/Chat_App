@@ -8,16 +8,24 @@ const useLogin = () => {
   const dispatch = useDispatch();
 
   const login = async ({ username, password }) => {
-    const isValid = handleInputErrors({ username, password });
-
-    if (!isValid) return;
+    if (!validateInput({ username, password })) return;
 
     setLoading(true);
     try {
-      await dispatch(loginUser({ username, password }));
+      const actionResult = await dispatch(loginUser({ username, password }));
+
+      if (loginUser.fulfilled.match(actionResult)) {
+        const user = actionResult.payload;
+        if (!user || !user._id) throw new Error("User data is missing!");
+
+        console.log("✅ Login successful:", user);
+        toast.success(`Welcome back, ${user.username}!`);
+      } else {
+        throw new Error(actionResult.payload || "Login failed!");
+      }
     } catch (error) {
-      const errorMessage = error?.message || "An unexpected error occurred.";
-      toast.error(errorMessage);
+      console.error("❌ Login error:", error.message);
+      toast.error(error.message);
     } finally {
       setLoading(false);
     }
@@ -26,9 +34,9 @@ const useLogin = () => {
   return { login, loading };
 };
 
-const handleInputErrors = ({ username, password }) => {
+const validateInput = ({ username, password }) => {
   if (!username || !password) {
-    toast.error("Please fill in all the fields.");
+    toast.error("Please fill in all fields.");
     return false;
   }
 

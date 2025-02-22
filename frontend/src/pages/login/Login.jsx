@@ -2,12 +2,12 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import useLogin from "../../hooks/useLogin";
-import { useSelector } from "react-redux";
-
+import { useDispatch, useSelector } from "react-redux";
 const Login = () => {
   const [inputs, setInputs] = useState({ username: "", password: "" });
   const { login, loading } = useLogin();
-  const { isAuthenticated, status } = useSelector((state) => state.auth);
+  const { isAuthenticated, status, user } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
@@ -16,13 +16,13 @@ const Login = () => {
   };
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && user) {
       toast.success("Login successful!");
       navigate("/");
     } else if (status === "failed") {
       toast.error("Failed to log in. Please check your credentials.");
     }
-  }, [isAuthenticated, status, navigate]);
+  }, [isAuthenticated, status, user, dispatch, navigate]);
 
   return (
     <div className="flex flex-col items-center justify-center min-w-96 mx-auto">

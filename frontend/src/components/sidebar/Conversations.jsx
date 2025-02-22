@@ -7,14 +7,19 @@ import { getRandomEmoji } from "../../utils/emoji";
 const Conversations = () => {
   //Fetching loading and conversations from useGetConversations hook
   const { loading, conversations } = useGetConversations();
+  const [useScroll, setUseScroll] = useState(true);
   const selectedConversation = useSelector(
     (state) => state.conversations.selectedConversation
   );
   //State for only rendering the emojis of respective user beside their names only for once
   const [emojis, setEmojis] = useState({});
 
-  //useEffect to do the rendering only once
   useEffect(() => {
+    if (conversations.length > 6) {
+      setUseScroll(true);
+    } else {
+      setUseScroll(false);
+    }
     const newEmojis = { ...emojis };
 
     let updated = false;
@@ -30,7 +35,11 @@ const Conversations = () => {
   }, [conversations, emojis]);
 
   return (
-    <div className="py-2 flex flex-col overflow-auto absolute bottom-28">
+    <div
+      className={`px-6 flex flex-col overflow-${
+        useScroll ? "scroll" : "hidden"
+      } absolute bottom-28`}
+    >
       {conversations.map((conversation, idx) => (
         <Conversation
           key={conversation._id}

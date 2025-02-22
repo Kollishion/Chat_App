@@ -1,26 +1,10 @@
-import { useEffect, useState } from "react";
-import io from "socket.io-client";
+import { useContext } from "react";
+import SocketContext from "../socketContext/socketProvider.jsx";
 
-const baseURL = "http://localhost:5000";
-
-const useTestSocket = () => {
-  const [onlineUsers, setOnlineUser] = useState([]);
-  useEffect(() => {
-    const socket = io(baseURL);
-
-    socket.on("connect", () => {
-      console.log("Connected:", socket.id);
-    });
-    socket.on("getOnlineUsers", (users) => {
-      setOnlineUser(users);
-    });
-    socket.on("disconnect", () => {
-      console.log("Disconnected from server");
-    });
-
-    return () => socket.close();
-  }, []);
-  return onlineUsers;
+export const useSocket = () => {
+  const context = useContext(SocketContext);
+  if (!context) {
+    throw new Error("useSocket must be used within a SocketProvider");
+  }
+  return context;
 };
-
-export default useTestSocket;
