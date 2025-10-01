@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const baseURL = "http://localhost:5000";
+const baseURL = "https://chat-app-yg9v.onrender.com/api";
 
 export const fetchConversation = createAsyncThunk(
   "conversations/fetchConversations",

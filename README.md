@@ -219,6 +219,7 @@ FRONTEND_URL=http://localhost:3000
 JWT_EXPIRE=your_jwt_expire_time_in_days
 RESET_PASSWORD_EXPIRE=your_reset_password__expire_time_taken_in_days
 COOKIE_EXPIRE=your_cookie_expire_time_in_days
+FRONTEND_URL=https://your_frontend_URL
 ```
 
 ### Running the App
