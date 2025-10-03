@@ -20,32 +20,23 @@ const allowedOrigins = [
   "https://chat-app-git-main-kollishions-projects.vercel.app",
 ];
 
-app.options(
-  "*",
+app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin) return callback(null, true); // allow Postman, curl, etc.
-      if (allowedOrigins.indexOf(origin) === -1) {
-        return callback(new Error("Not allowed by CORS"), false);
+      // allow requests with no origin (like Postman)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"), false);
       }
-      return callback(null, true);
     },
     credentials: true,
   })
 );
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.indexOf(origin) === -1) {
-        return callback(new Error("Not allowed by CORS"), false);
-      }
-      return callback(null, true);
-    },
-    credentials: true,
-  })
-);
+//options
+app.options("*", cors());
 
 app.use(express.json());
 app.use(cookieParser());
