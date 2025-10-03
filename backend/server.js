@@ -17,9 +17,11 @@ const PORT = process.env.PORT || 5000;
 // Middleware Setup
 app.use(
   cors({
-    origin: "https://chat-app-phi-three-64.vercel.app",
-    // Frontend URL
-    credentials: true, // Allow cookies to be sent
+    origin: [
+      "https://chat-app-phi-three-64.vercel.app",
+      "https://chat-app-git-main-kollishions-projects.vercel.app",
+    ],
+    credentials: true,
   })
 );
 
