@@ -20,13 +20,26 @@ const allowedOrigins = [
   "https://chat-app-git-main-kollishions-projects.vercel.app",
 ];
 
+app.options(
+  "*",
+  cors({
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true); // allow Postman, curl, etc.
+      if (allowedOrigins.indexOf(origin) === -1) {
+        return callback(new Error("Not allowed by CORS"), false);
+      }
+      return callback(null, true);
+    },
+    credentials: true,
+  })
+);
+
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin) return callback(null, true); // allow non-browser requests like Postman
+      if (!origin) return callback(null, true);
       if (allowedOrigins.indexOf(origin) === -1) {
-        const msg = `The CORS policy for this site does not allow access from the specified Origin.`;
-        return callback(new Error(msg), false);
+        return callback(new Error("Not allowed by CORS"), false);
       }
       return callback(null, true);
     },
