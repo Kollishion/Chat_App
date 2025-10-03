@@ -8,7 +8,8 @@ import jwt from "jsonwebtoken";
 //Sign Up
 export const signup = async (req, res) => {
   try {
-    const { fullName, username, email, password, confirmPassword, gender } = req.body;
+    const { fullName, username, email, password, confirmPassword, gender } =
+      req.body;
 
     if (password !== confirmPassword) {
       return res.status(400).json({ error: "Passwords don't match" });
@@ -76,13 +77,12 @@ export const login = async (req, res) => {
     const { username, password } = req.body;
 
     const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(400).json({ error: "Invalid username or password" });
+    }
 
-    const isPasswordCorrect = await bcrypt.compare(
-      password,
-      user?.password || ""
-    );
-
-    if (!user || !isPasswordCorrect) {
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+    if (!isPasswordCorrect) {
       return res.status(400).json({ error: "Invalid username or password" });
     }
 
@@ -127,7 +127,7 @@ export const forgotPassword = async (req, res) => {
       return res.status(404).json({ error: "User not found with this email!" });
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, {
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: process.env.RESET_PASSWORD_EXPIRE,
     });
 
@@ -148,7 +148,7 @@ export const resetPassword = async (req, res) => {
   const { id, token } = req.params;
   const { password } = req.body;
 
-  jwt.verify(token, process.env.JWT_SECRET_KEY, async (err, decoded) => {
+  jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
     if (err) {
       return res.status(400).json({ error: "Token is invalid or has expired" });
     }
