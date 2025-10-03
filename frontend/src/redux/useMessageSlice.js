@@ -5,7 +5,7 @@ export const sendMessage = createAsyncThunk(
   async ({ message, conversationId }, { rejectWithValue }) => {
     try {
       const response = await fetch(
-        `https://chat-app-yg9v.onrender.com/api/api/messages/send/${conversationId}`,
+        `https://chat-app-yg9v.onrender.com/api/messages/send/${conversationId}`,
         {
           method: "POST",
           headers: {

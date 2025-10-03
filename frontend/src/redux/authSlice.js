@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 
-const baseURL = "https://chat-app-yg9v.onrender.com/api";
+const baseURL = "https://chat-app-yg9v.onrender.com";
 
 // 🔹 Login user action
 export const loginUser = createAsyncThunk(
