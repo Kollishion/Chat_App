@@ -15,12 +15,21 @@ dotenv.config();
 const PORT = process.env.PORT || 5000;
 
 // Middleware Setup
+const allowedOrigins = [
+  "https://chat-app-phi-three-64.vercel.app",
+  "https://chat-app-git-main-kollishions-projects.vercel.app",
+];
+
 app.use(
   cors({
-    origin: [
-      "https://chat-app-phi-three-64.vercel.app",
-      "https://chat-app-git-main-kollishions-projects.vercel.app",
-    ],
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true); // allow non-browser requests like Postman
+      if (allowedOrigins.indexOf(origin) === -1) {
+        const msg = `The CORS policy for this site does not allow access from the specified Origin.`;
+        return callback(new Error(msg), false);
+      }
+      return callback(null, true);
+    },
     credentials: true,
   })
 );
