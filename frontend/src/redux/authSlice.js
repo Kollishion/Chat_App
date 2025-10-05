@@ -4,7 +4,6 @@ import { toast } from "react-hot-toast";
 
 const baseURL = "https://chat-app-yg9v.onrender.com";
 
-// 🔹 Login user action
 export const loginUser = createAsyncThunk(
   "auth/loginUser",
   async (credentials, { rejectWithValue }) => {
@@ -15,7 +14,6 @@ export const loginUser = createAsyncThunk(
         { withCredentials: true }
       );
 
-      // ✅ Store user in sessionStorage
       sessionStorage.setItem("user", JSON.stringify(response.data));
       return response.data;
     } catch (error) {
@@ -24,7 +22,6 @@ export const loginUser = createAsyncThunk(
   }
 );
 
-// 🔹 Signup user action
 export const signupUser = createAsyncThunk(
   "auth/signupUser",
   async (userData, { rejectWithValue }) => {
@@ -37,7 +34,6 @@ export const signupUser = createAsyncThunk(
   }
 );
 
-// 🔹 Forgot password action
 export const forgetPasswordUser = createAsyncThunk(
   "auth/forgetPasswordUser",
   async (userData, { rejectWithValue }) => {
@@ -53,7 +49,6 @@ export const forgetPasswordUser = createAsyncThunk(
   }
 );
 
-// 🔹 Reset password action
 export const resetPasswordUser = createAsyncThunk(
   "auth/resetPasswordUser",
   async ({ id, token, password }, { rejectWithValue }) => {
@@ -69,7 +64,6 @@ export const resetPasswordUser = createAsyncThunk(
   }
 );
 
-// 🔹 Initial State (Using sessionStorage)
 const initialState = {
   user: JSON.parse(sessionStorage.getItem("user")) || null,
   isAuthenticated: !!sessionStorage.getItem("user"),
@@ -77,7 +71,6 @@ const initialState = {
   error: null,
 };
 
-// 🔹 Auth Slice
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -87,13 +80,12 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       state.status = "idle";
       state.error = null;
-      sessionStorage.removeItem("user"); // ✅ Clears sessionStorage
+      sessionStorage.removeItem("user");
       toast.success("You have successfully logged out.");
     },
   },
   extraReducers: (builder) => {
     builder
-      // 🔹 Login Cases
       .addCase(loginUser.pending, (state) => {
         state.status = "loading";
         state.error = null;
@@ -110,7 +102,6 @@ const authSlice = createSlice({
         toast.error(state.error);
       })
 
-      // 🔹 Signup Cases
       .addCase(signupUser.pending, (state) => {
         state.status = "loading";
       })
@@ -127,6 +118,5 @@ const authSlice = createSlice({
   },
 });
 
-// 🔹 Exporting actions & reducer
 export const { logout } = authSlice.actions;
 export default authSlice.reducer;
