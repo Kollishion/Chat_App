@@ -15,13 +15,11 @@ const SignUp = () => {
 
   const { signup, loading } = useSignup();
 
-  //Function to handle signup form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     await signup(inputs);
   };
 
-  //Function to handle Gender Checkbox
   const handleCheckboxChange = (gender) => {
     setInputs({ ...inputs, gender });
   };

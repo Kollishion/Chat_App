@@ -1,14 +1,24 @@
 import { Server } from "socket.io";
 import http from "http";
 import express from "express";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
 
+const allowedOrigins = [
+  "http://localhost:3000",
+  process.env.FRONTEND_URL,
+  process.env.FRONTEND_URL_2,
+].filter(Boolean);
+
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:3000"],
+    origin: allowedOrigins,
     methods: ["GET", "POST"],
+    credentials: true,
   },
 });
 
@@ -41,11 +51,9 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", () => {
     console.log(`🔌 User disconnected: ${userId}, Socket ID: ${socket.id}`);
-
     if (userId in userSocketMap) {
       delete userSocketMap[userId];
     }
-
     io.emit("getOnlineUsers", Object.keys(userSocketMap));
   });
 });

@@ -97,11 +97,7 @@ const Login = () => {
                 "Login"
               )}
             </button>
-            {status === "failed" && (
-              <p className="text-red-500">
-                {/* Optionally display error messages here */}
-              </p>
-            )}
+            {status === "failed" && <p className="text-red-500">Error</p>}
           </div>
         </form>
       </div>
