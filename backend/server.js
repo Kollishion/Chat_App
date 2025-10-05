@@ -15,8 +15,9 @@ const PORT = process.env.PORT || 5000;
 
 // List of allowed frontend URLs
 const allowedOrigins = [
-  "https://chat-app-phi-three-64.vercel.app",
-  "https://chat-app-git-main-kollishions-projects.vercel.app",
+  (FRONTEND_URL = process.env.FRONTEND_URL || process.env.FRONTEND_URL_LOCAL),
+  (FRONTEND_URL_2 =
+    process.env.FRONTEND_URL_2 || process.env.FRONTEND_URL_LOCAL),
 ];
 
 // CORS options
