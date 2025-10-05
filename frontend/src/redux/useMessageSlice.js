@@ -1,37 +1,42 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import axios from "axios";
+import { toast } from "react-hot-toast";
+
+const axiosInstance = axios.create({
+  baseURL: "https://chat-app-yg9v.onrender.com",
+  withCredentials: true,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
 export const sendMessage = createAsyncThunk(
-  "conversations/sendMessage",
+  "messages/sendMessage",
   async ({ message, conversationId }, { rejectWithValue }) => {
     try {
-      const response = await fetch(
-        `https://chat-app-yg9v.onrender.com/api/messages/send/${conversationId}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ message }),
-          credentials: "include",
-        }
+      const response = await axiosInstance.post(
+        `/api/messages/send/${conversationId}`,
+        { message }
       );
-      const data = await response.json();
-      if (data.error) {
-        throw new Error(data.error);
-      }
-      return data;
+      return response.data;
     } catch (error) {
-      return rejectWithValue(error.message);
+      console.error("❌ Error sending message:", error);
+      const message =
+        error.response?.data?.error ||
+        error.response?.data?.message ||
+        "Failed to send message";
+      return rejectWithValue(message);
     }
   }
 );
 
-const conversationSlice = createSlice({
-  name: "conversations",
+const sendMessageSlice = createSlice({
+  name: "sendMessageSlice",
   initialState: {
     conversations: [],
     selectedConversation: null,
     loading: false,
+    error: null,
   },
   reducers: {
     setSelectedConversation: (state, action) => {
@@ -42,29 +47,35 @@ const conversationSlice = createSlice({
     builder
       .addCase(sendMessage.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
       .addCase(sendMessage.fulfilled, (state, action) => {
         state.loading = false;
         const { conversationId } = action.meta.arg;
+        const messageData = action.payload;
 
         const conversation = state.conversations.find(
           (conv) => conv._id === conversationId
         );
 
         if (conversation) {
-          conversation.messages.push(action.payload);
+          conversation.messages.push(messageData);
         } else {
           state.conversations.push({
             _id: conversationId,
-            messages: [action.payload],
+            messages: [messageData],
           });
         }
+
+        toast.success("Message sent ✅");
       })
-      .addCase(sendMessage.rejected, (state) => {
+      .addCase(sendMessage.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
+        toast.error(action.payload || "Failed to send message");
       });
   },
 });
 
-export const { setSelectedConversation } = conversationSlice.actions;
-export default conversationSlice.reducer;
+export const { setSelectedConversation } = sendMessageSlice.actions;
+export default sendMessageSlice.reducer;

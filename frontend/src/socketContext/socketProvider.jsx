@@ -16,7 +16,7 @@ export const SocketProvider = ({ children }) => {
       return;
     }
 
-    const newSocket = io("http://localhost:5000", {
+    const newSocket = io("https://chat-app-yg9v.onrender.com", {
       query: { userId: user._id },
       transports: ["websocket"],
       withCredentials: true,

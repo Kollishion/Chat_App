@@ -1,35 +1,35 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { toast } from "react-hot-toast";
 import { createSelector } from "reselect";
+import { toast } from "react-hot-toast";
+import axios from "axios";
 
-//Thunk for handling getMessage request
+const axiosInstance = axios.create({
+  baseURL: "https://chat-app-yg9v.onrender.com",
+  withCredentials: true,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
 export const getMessage = createAsyncThunk(
-  "conversations/getMessage",
+  "messages/getMessage",
   async ({ conversationId }, { rejectWithValue }) => {
     try {
-      const response = await fetch(
-        `https://chat-app-yg9v.onrender.com/api/messages/${conversationId}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        }
+      const response = await axiosInstance.get(
+        `/api/messages/${conversationId}`
       );
-      const data = await response.json();
-      if (data.error) {
-        throw new Error(data.error);
-      }
-      return data;
+      return response.data;
     } catch (error) {
-      console.error("Error in getMessage:", error.message);
-      return rejectWithValue(error.message);
+      console.error("❌ Error fetching messages:", error);
+      const message =
+        error.response?.data?.error ||
+        error.response?.data?.message ||
+        "Failed to fetch messages";
+      return rejectWithValue(message);
     }
   }
 );
 
-// Selector to get messages for a specific conversation
 export const selectMessagesByConversationId = createSelector(
   (state) => state.getMessagesSlice.conversations,
   (_, conversationId) => conversationId,
@@ -41,13 +41,13 @@ export const selectMessagesByConversationId = createSelector(
   }
 );
 
-//Slice for getting the messages
 const getMessagesSlice = createSlice({
   name: "getMessagesSlice",
   initialState: {
-    conversations: [],
+    conversations: [], // [{ _id, messages: [] }]
     selectedMessage: null,
     loading: false,
+    error: null,
   },
   reducers: {
     setSelectedMessage: (state, action) => {
@@ -65,37 +65,38 @@ const getMessagesSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      //pending state
       .addCase(getMessage.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
-      //fulfilled state
       .addCase(getMessage.fulfilled, (state, action) => {
         state.loading = false;
         const conversationId = action.meta.arg.conversationId;
+
+        // Normalize payload into array
+        const messages = Array.isArray(action.payload)
+          ? action.payload
+          : [action.payload];
 
         const conversation = state.conversations.find(
           (conv) => conv._id === conversationId
         );
 
         if (conversation) {
-          conversation.messages = Array.isArray(action.payload)
-            ? action.payload
-            : [action.payload];
+          conversation.messages = messages;
         } else {
           state.conversations.push({
             _id: conversationId,
-            messages: Array.isArray(action.payload)
-              ? action.payload
-              : [action.payload],
+            messages,
           });
         }
 
         toast.success("Messages fetched successfully!");
       })
-      //rejected state
-      .addCase(getMessage.rejected, (state) => {
+      .addCase(getMessage.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
+        toast.error(action.payload || "Failed to fetch messages");
       });
   },
 });
