@@ -11,7 +11,7 @@ const Logout = () => {
   const handleLogout = async () => {
     try {
       await axios.post(
-        "http://localhost:5000/api/auth/logout",
+        "https://chat-app-yg9v.onrender.com/api/auth/logout",
         {},
         {
           withCredentials: true,
