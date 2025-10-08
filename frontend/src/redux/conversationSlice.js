@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 
 const axiosInstance = axios.create({
-  baseURL: "https://chat-app-yg9v.onrender.com",
+  baseURL: "https://chat-app-yg9v.onrender.com" || "http://localhost:5000",
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
@@ -26,13 +26,12 @@ export const fetchConversation = createAsyncThunk(
   }
 );
 
-
 const conversationSlice = createSlice({
   name: "conversations",
   initialState: {
     conversations: [],
     selectedConversation: null,
-    status: "idle", 
+    status: "idle",
     error: null,
   },
   reducers: {

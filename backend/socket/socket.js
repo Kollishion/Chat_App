@@ -10,8 +10,9 @@ const server = http.createServer(app);
 
 const allowedOrigins = [
   "http://localhost:3000",
-  process.env.FRONTEND_URL,
-  process.env.FRONTEND_URL_2,
+  "http://localhost:5173",
+  "https://chat-app-phi-three-64.vercel.app",
+  "https://chat-p617i9sew-kollishions-projects.vercel.app",
 ].filter(Boolean);
 
 const io = new Server(server, {

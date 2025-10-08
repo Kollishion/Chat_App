@@ -3,7 +3,7 @@ import axios from "axios";
 import { toast } from "react-hot-toast";
 
 const axiosInstance = axios.create({
-  baseURL: "https://chat-app-yg9v.onrender.com",
+  baseURL: "https://chat-app-yg9v.onrender.com" || "http://localhost:5000",
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
